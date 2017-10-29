@@ -3,7 +3,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/project/react
   docker:
-    - image: starefossen/ruby-node:2-6
+    - image: starefossen/ruby-node:2-8
 
 default_filters: &default_filters
   tags:
