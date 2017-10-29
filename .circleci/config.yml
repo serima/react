@@ -113,6 +113,16 @@ jobs:
           name: check_license
           command: ./scripts/circleci/check_license.sh
 
+  check_modules:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - *restore_node_modules
+      - run:
+          name: check_license
+          command: ./scripts/circleci/check_modules.sh
+
   track_stats:
     <<: *defaults
     steps:
@@ -137,6 +147,16 @@ jobs:
       - run:
           name: build
           command: ./scripts/circleci/build.sh
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - *restore_node_modules
+      - run:
+          name: deploy
+          command: ./scripts/circleci/upload_build.sh
 
 workflows:
   version: 2
@@ -169,6 +189,10 @@ workflows:
           requires:
             - install
       - check_license:
+          filters: *default_filters
+          requires:
+            - install
+      - check_modules:
           filters: *default_filters
           requires:
             - install
