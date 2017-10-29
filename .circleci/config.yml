@@ -43,7 +43,8 @@ jobs:
           root: ~/project
           paths:
             - react
-  eslint:
+  # For balancing
+  eslint_prettier_flow_check-licence-and-modules_test-print-warnings_track-stats:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -52,6 +53,28 @@ jobs:
       - run:
           name: eslint
           command: node ./scripts/tasks/eslint
+      - run:
+          name: prettier
+          command: node ./scripts/prettier/index
+      - run:
+          name: flow
+          command: node ./scripts/tasks/flow
+      - run:
+          name: check_license
+          command: ./scripts/circleci/check_license.sh
+      - run:
+          name: check_modules
+          command: ./scripts/circleci/check_modules.sh
+      - run:
+          name: test_print_warnings
+          command: ./scripts/circleci/test_print_warnings.sh
+      - run:
+          name: track_stats
+          command: |
+            # skip fingerprints
+            mkdir -p ~/.ssh
+            echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+            ./scripts/circleci/track_stats.sh
 
   coverage:
     <<: *defaults
@@ -63,26 +86,6 @@ jobs:
           name: coverage
           command: ./scripts/circleci/test_coverage.sh
 
-  prettier:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: prettier
-          command: node ./scripts/prettier/index
-
-  flow:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: flow
-          command: node ./scripts/tasks/flow
-
   jest:
     <<: *defaults
     steps:
@@ -92,51 +95,6 @@ jobs:
       - run:
           name: jest
           command: node ./scripts/tasks/jest
-
-  test_print_warnings:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: test_print_warnings
-          command: ./scripts/circleci/test_print_warnings.sh
-
-  check_license:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: check_license
-          command: ./scripts/circleci/check_license.sh
-
-  check_modules:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: check_license
-          command: ./scripts/circleci/check_modules.sh
-
-  track_stats:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - *restore_node_modules
-      - run:
-          name: skip fingerprints
-          command: |
-            mkdir -p ~/.ssh
-            echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-      - run:
-          name: track_stats
-          command: ./scripts/circleci/track_stats.sh
 
   build:
     <<: *defaults
@@ -164,19 +122,7 @@ workflows:
     jobs:
       - install:
           filters: *default_filters
-      - eslint:
-          filters: *default_filters
-          requires:
-            - install
       - coverage:
-          filters: *default_filters
-          requires:
-            - install
-      - prettier:
-          filters: *default_filters
-          requires:
-            - install
-      - flow:
           filters: *default_filters
           requires:
             - install
@@ -184,19 +130,7 @@ workflows:
           filters: *default_filters
           requires:
             - install
-      - test_print_warnings:
-          filters: *default_filters
-          requires:
-            - install
-      - check_license:
-          filters: *default_filters
-          requires:
-            - install
-      - check_modules:
-          filters: *default_filters
-          requires:
-            - install
-      - track_stats:
+      - eslint_prettier_flow_check-licence-and-modules_test-print-warnings_track-stats:
           filters: *default_filters
           requires:
             - install
