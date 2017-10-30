@@ -116,7 +116,7 @@ workflows:
   version: 2
   install-test-build-and-deploy:
     jobs:
-      - install:
+      - install
       - coverage:
           requires:
             - install
