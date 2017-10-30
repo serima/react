@@ -5,10 +5,6 @@ defaults: &defaults
   docker:
     - image: starefossen/ruby-node:2-8
 
-default_filters: &default_filters
-  tags:
-    only: '/^v[0-9]\+\.[0-9]\+\.[0-9]\+$/'
-
 restore_node_modules: &restore_node_modules
   restore_cache:
     name: Restore node_modules cache
@@ -121,20 +117,19 @@ workflows:
   install-test-build-and-deploy:
     jobs:
       - install:
-          filters: *default_filters
       - coverage:
-          filters: *default_filters
           requires:
             - install
       - jest:
-          filters: *default_filters
           requires:
             - install
       - eslint_prettier_flow_check-licence-and-modules_test-print-warnings_track-stats:
-          filters: *default_filters
           requires:
             - install
       - build:
-          filters: *default_filters
           requires:
             - install
+      - deploy:
+          requires:
+            - build
+
